@@ -11,6 +11,11 @@ print(f"Airline Delays: {df_flight_delays.shape}")
 # Drop the first column, which just provides enumerates the rows. The DataFrame index does so already
 df_flight_delays.drop(df_flight_delays.columns[:2], axis=1, inplace=True)
 
+# Split datasets
+df_success_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 0.0) | (df_flight_delays["Diverted"] == 0.0)]
+df_failed_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
+df_success_flights.dropna(subset=["TailNum"], inplace=True)
+
 # Extract subset
 # ds_subset = df_airline_delay.iloc[:500]
 # ds_subset.to_csv("datasets/DelayedFlightsSub.csv")
@@ -58,10 +63,6 @@ df_missing_any = df_flight_delays[(df_flight_delays["ActualElapsedTime"].isna())
 df_missing_all = df_flight_delays[(df_flight_delays["ActualElapsedTime"].isna()) &
                                   (df_flight_delays["AirTime"].isna()) &
                                   (df_flight_delays["ArrDelay"].isna()) & df_flight_delays["AirTime"].isna()]
-
-# Split datasets
-df_success_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 0.0) | (df_flight_delays["Diverted"] == 0.0)]
-df_failed_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
 
 df_non_delayed = df_flight_delays[(df_flight_delays["ArrDelay"] <= 0) & (df_flight_delays["DepDelay"] <= 0)]
 
@@ -192,4 +193,28 @@ plt.show()
 plt.hist(df_all_delays["DepDelay"].transform(lambda v: v if v <= 249 else 260), bins=50)
 plt.title("Departure Delay (minutes)")
 plt.show()
+
+# COMPUTE WEIGHT OF TYPES OF DELAY
+
+df_flights_delayed = df_flight_delays[df_flight_delays["ArrDelay"] > 0]
+df_flights_delayed_detailed = df_flights_delayed[df_flights_delayed[]]
+
+
+def compute_weights(r):
+    arr_dly = r["ArrDelay"]
+    carrier_dly_weight = r["CarrierDelay"] / arr_dly
+    weat_dly_weight = r["WeatherDelay"] / arr_dly
+    nas_dly_weight = r["NASDelay"] / arr_dly
+    sec_dly_weight = r["SecurityDelay"] / arr_dly
+    late_dly_weight = r["LateAircraftDelay"] / arr_dly
+
+    return {"CarrierDelayWeight": carrier_dly_weight, "WeatherDelayWeight": weat_dly_weight,
+            "NASDelayWeight": nas_dly_weight, "SecurityDelayWeight": sec_dly_weight,
+            "LateAircraftDelayWeight": late_dly_weight}
+
+
+df_dly_weights = df_flights_delayed.apply(compute_weights, axis=1)
+
+
+
 
