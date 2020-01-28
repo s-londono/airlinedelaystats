@@ -8,6 +8,9 @@ from sklearn import preprocessing
 df_flight_delays = pd.read_csv("datasets/DelayedFlights.csv")
 print(f"Airline Delays: {df_flight_delays.shape}")
 
+# Drop the first column, which just provides enumerates the rows. The DataFrame index does so already
+df_flight_delays.drop(df_flight_delays.columns[:2], axis=1, inplace=True)
+
 # Extract subset
 # ds_subset = df_airline_delay.iloc[:500]
 # ds_subset.to_csv("datasets/DelayedFlightsSub.csv")
@@ -21,9 +24,6 @@ df_flight_delays.info()
 
 # Compute stats about each column
 df_flight_delays.describe()
-
-# Drop the first column, which just provides enumerates the rows. The DataFrame index does so already
-df_flight_delays.drop(df_flight_delays.columns[:2], axis=1, inplace=True)
 
 # Histogram of some variables. Warn: heavy outliers
 df_flight_delays[["CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"]].hist(bins=25)
@@ -43,6 +43,10 @@ df_nan_counts = df_nans.sum()
 df_nan_percents = (df_nan_counts / df_flight_delays.shape[0]) * 100
 df_nan_data = pd.DataFrame({"CountMissing": df_nan_counts, "PercentMissing": df_nan_counts}, index=df_nan_counts.index)
 
+# Analyze missing values in CRSElapsedTime: all are diverted
+df_missing_arrtime = df_flight_delays[(df_flight_delays["CRSElapsedTime"].isna()) &
+                                      (df_flight_delays["Diverted"] == 1.0)]
+
 # Analyze missing values in ArrTime
 df_missing_arrtime = df_flight_delays[df_flight_delays["ArrTime"].isna()]
 sum((df_missing_arrtime["Cancelled"] == 1.0) | (df_missing_arrtime["Diverted"] == 1.0))
@@ -55,9 +59,9 @@ df_missing_all = df_flight_delays[(df_flight_delays["ActualElapsedTime"].isna())
                                   (df_flight_delays["AirTime"].isna()) &
                                   (df_flight_delays["ArrDelay"].isna()) & df_flight_delays["AirTime"].isna()]
 
-df_missing_any.head()
-
-df_canceld_or_divertd = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
+# Split datasets
+df_success_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 0.0) | (df_flight_delays["Diverted"] == 0.0)]
+df_failed_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
 
 df_non_delayed = df_flight_delays[(df_flight_delays["ArrDelay"] <= 0) & (df_flight_delays["DepDelay"] <= 0)]
 
@@ -70,6 +74,12 @@ df_any_dly_details_na = df_flight_delays[df_flight_delays["CarrierDelay"].isna()
                                          df_flight_delays["WeatherDelay"].isna() | df_flight_delays["NASDelay"].isna() |
                                          df_flight_delays["SecurityDelay"].isna() |
                                          df_flight_delays["LateAircraftDelay"].isna()]
+
+df_no_arrtime_cncld = df_flight_delays[(df_flight_delays["ArrTime"].isna() == False) &
+                                       (df_flight_delays["Cancelled"] == 1.0)]
+
+df_no_arrtime_dvrtd = df_flight_delays[(df_flight_delays["ArrTime"].isna() == False) &
+                                       (df_flight_delays["Diverted"] == 1.0)]
 
 # Do missing delay columns correspond to cancelled flights?
 total_cancelled = sum(df_flight_delays["Cancelled"] > 0.0)
