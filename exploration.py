@@ -199,22 +199,42 @@ plt.show()
 df_flights_delayed = df_flight_delays[df_flight_delays["ArrDelay"] > 0]
 df_flights_delayed_detailed = df_flights_delayed[df_flights_delayed[]]
 
+# Flights that have information about all types of delay
+df_all_delay_data = df_flight_delays[["ArrDelay", "CarrierDelay", "WeatherDelay", "NASDelay",
+                                      "SecurityDelay", "LateAircraftDelay"]]
 
-def compute_weights(r):
-    arr_dly = r["ArrDelay"]
-    carrier_dly_weight = r["CarrierDelay"] / arr_dly
-    weat_dly_weight = r["WeatherDelay"] / arr_dly
-    nas_dly_weight = r["NASDelay"] / arr_dly
-    sec_dly_weight = r["SecurityDelay"] / arr_dly
-    late_dly_weight = r["LateAircraftDelay"] / arr_dly
+# Get flights that have complete information about delays
+df_flights_full_dly_data = df_all_delay_data[(df_flight_delays["ArrDelay"].isna() == False) &
+                                             (df_flight_delays["CarrierDelay"].isna() == False) &
+                                             (df_flight_delays["WeatherDelay"].isna() == False) &
+                                             (df_flight_delays["NASDelay"].isna() == False) &
+                                             (df_flight_delays["SecurityDelay"].isna() == False) &
+                                             (df_flight_delays["LateAircraftDelay"].isna() == False)]
 
-    return {"CarrierDelayWeight": carrier_dly_weight, "WeatherDelayWeight": weat_dly_weight,
-            "NASDelayWeight": nas_dly_weight, "SecurityDelayWeight": sec_dly_weight,
-            "LateAircraftDelayWeight": late_dly_weight}
+# Compute delay weights
+df_delay_totals = df_flights_full_dly_data.sum()
+df_dly_weights = df_delay_totals / df_delay_totals["ArrDelay"]
+
+# Impute missing values
+df_flight_delays[["CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"]]\
+    .apply(lambda c: c.fillna(df_flight_delays["ArrDelay"] * df_dly_weights[c.name]))
+
+for var in ["CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"]:
+    df_flight_delays[var].fillna(df_flight_delays["ArrDelay"] * df_dly_weights[var], inplace=True)
+
+print(df_flight_delays[["ArrDelay", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"]].isna().sum())
 
 
-df_dly_weights = df_flights_delayed.apply(compute_weights, axis=1)
+def impute_delay_type_column(column):
+    df_flight_delays[column].fillna(df_flight_delays["ArrDelay"] * df_dly_weights[column], inplace=True)
+
+impute_delay_type_column("WeatherDelay")
+
+nan_nas_delays = df_flight_delays["NASDelay"].isna()
+nan_sec_delays = df_flight_delays["SecurityDelay"].isna()
+
+impute_delay_type_column("NASDelay")
+impute_delay_type_column("SecurityDelay")
 
 
-
-
+df_failed_flights.drop(columns=["ArrTime", "ActualElapsedTime", "AirTime", "ArrDelay", "TaxiIn", "TaxiOut", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"])
