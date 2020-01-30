@@ -16,6 +16,9 @@ df_success_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 0.0) | (
 df_failed_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
 df_success_flights.dropna(subset=["TailNum"], inplace=True)
 
+plt.hist(df_flight_delays["LateAircraftDelay"])
+plt.show()
+
 # Extract subset
 # ds_subset = df_airline_delay.iloc[:500]
 # ds_subset.to_csv("datasets/DelayedFlightsSub.csv")
@@ -238,3 +241,15 @@ impute_delay_type_column("SecurityDelay")
 
 
 df_failed_flights.drop(columns=["ArrTime", "ActualElapsedTime", "AirTime", "ArrDelay", "TaxiIn", "TaxiOut", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"])
+
+# PLOTS
+
+# Variables we aim to draw conclusions about
+target_vars = ["ArrDelay", "DepDelay", "CarrierDelay", "WeatherDelay", "NASDelay",
+               "SecurityDelay", "LateAircraftDelay", "Cancelled", "Diverted"]
+
+# Compute summary statistics about these variables, including the 95th and 99th percentiles
+df_summary_stats = df_flight_delays[target_vars].describe(percentiles=[0.25, 0.5, 0.75, 0.95, 0.99])
+
+plt.subplot(3, 3, 1)
+
