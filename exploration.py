@@ -16,8 +16,6 @@ df_success_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 0.0) | (
 df_failed_flights = df_flight_delays[(df_flight_delays["Cancelled"] == 1.0) | (df_flight_delays["Diverted"] == 1.0)]
 df_success_flights.dropna(subset=["TailNum"], inplace=True)
 
-plt.hist(df_flight_delays["LateAircraftDelay"])
-plt.show()
 
 # Extract subset
 # ds_subset = df_airline_delay.iloc[:500]
@@ -252,4 +250,29 @@ target_vars = ["ArrDelay", "DepDelay", "CarrierDelay", "WeatherDelay", "NASDelay
 df_summary_stats = df_flight_delays[target_vars].describe(percentiles=[0.25, 0.5, 0.75, 0.95, 0.99])
 
 plt.subplot(3, 3, 1)
+
+
+# Question 1:
+
+df_carrier_perf = df_flight_delays[["UniqueCarrier", "ArrDelay", "DepDelay", "Cancelled", "Diverted"]]
+
+# Group the dataset by carrier and compute the mean for each variable
+delay_means = df_carrier_perf.groupby("UniqueCarrier").mean()
+
+max_mean_delays = delay_means.idxmax()
+min_mean_delays = delay_means.idxmin()
+
+# plt.plot(delay_means.index, delay_means["ArrDelay"])
+
+bar_width = 0.55
+
+fig2 = plt.figure(figsize=(18, 6))
+axes = fig2.subplots(nrows=1, ncols=2)
+
+axes[0].bar(delay_means.index, delay_means["ArrDelay"].sort_values(ascending=False), bar_width, color=(0.8, 0.3, 0.3, 0.4))
+# axes[0].set_title("Arrival Delays")
+axes[0].bar(delay_means.index, delay_means["DepDelay"].sort_values(ascending=False), bar_width, color=(0.3, 0.3, 0.8, 0.4))
+# axes[1].set_title("Departure Delays")
+
+plt.show()
 
