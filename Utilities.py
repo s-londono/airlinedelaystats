@@ -1,5 +1,25 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+
+
+def build_nan_data(df):
+    """
+    Builds a DataFrame containing the total count and percentage of values missing
+    in each column of the DataFrame passed as argument
+    INPUT
+        df - the dataframe in which this function will count for missing values
+    OUTPUT
+        dataframe with the names of variables in df as index and two columns: count of missing values in
+        each variable and percent of missing values in each variable
+    """
+    # Count the total missing entries per column
+    df_nan_counts = df.isna().sum()
+
+    # Compute the percentage of missing values per column
+    df_nan_percents = (df_nan_counts / df.shape[0]) * 100
+
+    return pd.DataFrame({"# Missing": df_nan_counts, "% Missing": df_nan_percents}, index=df_nan_counts.index)
 
 
 def bi_bar_plot(labels, x1, x2, label1, label2, ylabel, title, bar_width=0.4, figsize=(18, 6)):
