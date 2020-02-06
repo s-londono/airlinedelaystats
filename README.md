@@ -1,4 +1,4 @@
-# Analysis of Airline Delay Statistics
+# Analysis of Airline Disruption Data
 
 In this project we use Python and libraries such as Pandas and Scikitlearn to analyze the performance of flights 
 in the U.S. We follow the CRISP-DM process to examine the data.
