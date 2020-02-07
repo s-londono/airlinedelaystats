@@ -29,6 +29,10 @@ Throughout the analysis we aimed at answering the following questions:
 The answers we arrive at will hopefully help passengers make more informed decisions in their travels and avoid 
 the inconveniences of getting into a delayed flight.
 
+Please refer to the article published at Medium about this project:
+
+[https://link.medium.com/Bxheuzc1R3](https://link.medium.com/Bxheuzc1R3)
+
 ### Results
 
 As a result of the Analysis, we conclude that by making use of descriptive statistics and plots, we can dig a lot of 
